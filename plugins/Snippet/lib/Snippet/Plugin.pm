@@ -1,6 +1,30 @@
 package Snippet::Plugin;
 
 use strict;
+use Encode;
+
+sub pre_run {
+    my $app = MT->instance;
+    if ( $app->mode eq 'search_replace' ) {
+        if ( my $search = $app->param( 'search' ) ) {
+            my $plugin = MT->component( 'Snippet' );
+            my $core = MT->component( 'core' );
+            my $registry = $core->registry( 'applications', 'cms', 'search_apis', 'entry', 'search_cols' );
+            $registry->{ snippet } = $plugin->translate( 'Snippet' );
+            $app->param( 'search', MT::I18N::utf8_off( $search ) );
+        }
+    }
+}
+
+sub serarch_replace {
+    my ( $cb, $app, $param, $tmpl ) = @_;
+    if ( $app->mode eq 'search_replace' ) {
+        if ( my $search = $app->param( 'search' ) ) {
+            Encode::_utf8_on( $search );
+            $param->{ search } = $search;
+        }
+    }
+}
 
 sub _hdlr_snippet {
     my ( $ctx, $args ) = @_;

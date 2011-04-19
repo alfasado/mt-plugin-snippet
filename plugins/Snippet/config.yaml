@@ -9,10 +9,12 @@ blog_config_template: snippet.tmpl
 l10n_class: Snippet::L10N
 description: '<__trans phrase="Insert snippet to edit_entry.tmpl.">'
 callbacks:
+    MT::App::CMS::pre_run: $snippet::Snippet::Plugin::pre_run
     MT::App::CMS::template_param.edit_entry: $snippet::Snippet::Plugin::insert_snippet
     cms_pre_save.entry: $snippet::Snippet::Plugin::save_snippet
     cms_pre_save.page: $snippet::Snippet::Plugin::save_snippet
     cms_pre_preview: $snippet::Snippet::Plugin::preview_snippet
+    MT::App::CMS::template_param.search_replace: $snippet::Snippet::Plugin::serarch_replace
 object_types:
     entry:
         snippet: blob
@@ -26,6 +28,4 @@ tags:
         EntrySnippet: $snippet::Snippet::Plugin::_hdlr_snippet
         PageSnippet: $snippet::Snippet::Plugin::_hdlr_snippet
 
-# TODO / Search API
 # TODO / Category and the Other Object
-
