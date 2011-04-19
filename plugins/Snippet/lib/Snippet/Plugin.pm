@@ -40,7 +40,7 @@ sub _hdlr_snippet {
 sub preview_snippet {
     my ( $cb, $app, $entry, $param ) = @_;
     if (! $app->param( 'snippet_beacon' ) ) {
-        return;
+        return 1;
     }
     my $ref = ref $entry;
     if ( ( $ref eq 'MT::Entry' ) || ( $ref eq 'MT::Page' ) ) {
@@ -62,7 +62,7 @@ sub preview_snippet {
 sub save_snippet {
     my ( $cb, $app, $entry, $original ) = @_;
     if (! $app->param( 'snippet_beacon' ) ) {
-        return;
+        return 1;
     }
     my $data;
     my $q = $app->param();
