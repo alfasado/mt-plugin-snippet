@@ -1,0 +1,26 @@
+name: Snippet
+id:   Snippet
+key:  snippet
+version: 0.1
+schema_version: 0.1
+author_link: https://alfasado.net/
+author_name: Alfasado Inc.
+blog_config_template: snippet.tmpl
+l10n_class: Snippet::L10N
+description: '<__trans phrase="Insert snippet to edit_entry.tmpl.">'
+callbacks:
+    MT::App::CMS::template_param.edit_entry: $snippet::Snippet::Plugin::insert_snippet
+    cms_pre_save.entry: $snippet::Snippet::Plugin::save_snippet
+    cms_pre_save.page: $snippet::Snippet::Plugin::save_snippet
+    cms_pre_preview: $snippet::Snippet::Plugin::preview_snippet
+object_types:
+    entry:
+        snippet: blob
+settings:
+    entry_snippet:
+        Default: '<input type="text" name="snippet" id="snippet" class="full-width" value="<mt:var name="snippet" escape="html">" mt:watch-change="1" autocomplete="off" />'
+    page_snippet:
+        Default: '<input type="text" name="snippet" id="snippet" class="full-width" value="<mt:var name="snippet" escape="html">" mt:watch-change="1" autocomplete="off" />'
+tags:
+    function:
+        EntrySnippet: $snippet::Snippet::Plugin::_hdlr_snippet
