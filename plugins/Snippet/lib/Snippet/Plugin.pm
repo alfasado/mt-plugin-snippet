@@ -34,13 +34,22 @@ sub preview_snippet {
 
 sub save_snippet {
     my ( $cb, $app, $entry, $original ) = @_;
+    my $mode = $app->mode;
+    if ( $mode eq 'save_entries' ) {
+        return 1;
+    }
     my $data;
     my $q = $app->param();
+    my $has_snippet;
     for my $key ( $q->param ) {
         if ( $key =~ /^snippet/ ) {
+            $has_snippet = 1;
             my $value = $q->param( $key );
             $data->{ $key } = $value;
         }
+    }
+    if (! $has_snippet ) {
+        return 1;
     }
     require MT::Serialize;
     my $ser = MT::Serialize->serialize( \$data );
