@@ -24,3 +24,8 @@ settings:
 tags:
     function:
         EntrySnippet: $snippet::Snippet::Plugin::_hdlr_snippet
+        PageSnippet: $snippet::Snippet::Plugin::_hdlr_snippet
+
+# TODO / Search API
+# TODO / Category and the Other Object
+
