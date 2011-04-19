@@ -15,6 +15,9 @@ sub _hdlr_snippet {
 
 sub preview_snippet {
     my ( $cb, $app, $entry, $param ) = @_;
+    if (! $app->param( 'snippet_beacon' ) ) {
+        return;
+    }
     my $ref = ref $entry;
     if ( ( $ref eq 'MT::Entry' ) || ( $ref eq 'MT::Page' ) ) {
         my $data;
@@ -34,9 +37,8 @@ sub preview_snippet {
 
 sub save_snippet {
     my ( $cb, $app, $entry, $original ) = @_;
-    my $mode = $app->mode;
-    if ( $mode eq 'save_entries' ) {
-        return 1;
+    if (! $app->param( 'snippet_beacon' ) ) {
+        return;
     }
     my $data;
     my $q = $app->param();
@@ -74,6 +76,7 @@ sub insert_snippet {
         $param->{ $key } = $params->{ $key };
     }
     my $snippet = $plugin->get_config_value( $object_type . '_snippet', 'blog:' . $param->{ blog_id } );
+    $snippet .= '<input type="hidden" name="snippet_beacon" value="1" id="snippet_beacon" />';
     my $entry_prefs = $app->permissions->$prefs;
     my $show_snippet = 1 if $entry_prefs =~ /,snippet,/;
     push( @{ $param->{ field_loop } }, {
