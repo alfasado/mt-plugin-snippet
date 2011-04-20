@@ -24,6 +24,9 @@ settings:
     page_snippet:
         Default: '<input type="text" name="snippet" id="snippet" class="full-width" value="<mt:var name="snippet" escape="html">" mt:watch-change="1" autocomplete="off" />'
 tags:
+    block:
+        EntrySnippetVars: $snippet::Snippet::Plugin::_hdlr_snippet_vars
+        PageSnippetVars: $snippet::Snippet::Plugin::_hdlr_snippet_vars
     function:
         EntrySnippet: $snippet::Snippet::Plugin::_hdlr_snippet
         PageSnippet: $snippet::Snippet::Plugin::_hdlr_snippet

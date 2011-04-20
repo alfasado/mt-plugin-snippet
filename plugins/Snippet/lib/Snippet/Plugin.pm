@@ -29,18 +29,52 @@ sub serarch_replace {
 sub _hdlr_snippet {
     my ( $ctx, $args ) = @_;
     my $key = $args->{ key } || 'snippet';
+    my $glue = $args->{ glue } || ',';
     my $entry = $ctx->stash( 'entry' );
     my $data = $entry->snippet;
     require MT::Serialize;
     my $out = MT::Serialize->unserialize( $data );
     my $params = $$out;
+    my $value = $params->{ $key };
+    if ( ( ref $value ) eq 'ARRAY' ) {
+        return join( $glue, @$value );
+    }
     return $params->{ $key } || '';
+}
+
+sub _hdlr_snippet_vars {
+    my ( $ctx, $args, $cond ) = @_;
+    my $key = $args->{ key } || 'snippet';
+    my $entry = $ctx->stash( 'entry' );
+    my $data = $entry->snippet;
+    require MT::Serialize;
+    my $out = MT::Serialize->unserialize( $data );
+    my $params = $$out;
+    my $value = $params->{ $key };
+    my @snipped_loop;
+    if ( ( ref $value ) eq 'ARRAY' ) {
+        for my $val ( @$value ) {
+            push ( @snipped_loop, { snippet_option => $val } );
+        }
+    } else {
+        push ( @snipped_loop, { snippet_option => $value } );
+    }
+    my $tokens = $ctx->stash( 'tokens' );
+    my $builder = $ctx->stash( 'builder' );
+    my $vars = $ctx->{ __stash }{ vars } ||= {};
+    my $old_vars = $vars;
+    for my $snippet ( @snipped_loop ) {
+        $vars->{ 'snippet_option' } = $snippet->{ snippet_option };
+    }
+    my $out = $builder->build( $ctx, $tokens, $cond );
+    $vars = $ctx->{ __stash }{ vars } = $old_vars;
+    return $out;
 }
 
 sub preview_snippet {
     my ( $cb, $app, $entry, $param ) = @_;
     if (! $app->param( 'snippet_beacon' ) ) {
-        return 1;
+        return;
     }
     my $ref = ref $entry;
     if ( ( $ref eq 'MT::Entry' ) || ( $ref eq 'MT::Page' ) ) {
@@ -49,7 +83,12 @@ sub preview_snippet {
         for my $key ( $q->param ) {
             if ( $key =~ /^snippet/ ) {
                 my $value = $q->param( $key );
-                $data->{ $key } = $value;
+                my @values = $q->param( $key );
+                if ( scalar @values > 1 ) {
+                    $data->{ $key } = \@values;
+                } else {
+                    $data->{ $key } = $value;
+                }
             }
         }
         require MT::Serialize;
@@ -71,7 +110,12 @@ sub save_snippet {
         if ( $key =~ /^snippet/ ) {
             $has_snippet = 1;
             my $value = $q->param( $key );
-            $data->{ $key } = $value;
+            my @values = $q->param( $key );
+            if ( scalar @values > 1 ) {
+                $data->{ $key } = \@values;
+            } else {
+                $data->{ $key } = $value;
+            }
         }
     }
     if (! $has_snippet ) {
@@ -97,7 +141,17 @@ sub insert_snippet {
     my $out = MT::Serialize->unserialize( $data );
     my $params = $$out;
     foreach my $key ( keys %$params ) {
-        $param->{ $key } = $params->{ $key };
+        my $value = $params->{ $key };
+        $param->{ $key } = $value;
+        my @snipped_loop;
+        if ( ( ref $value ) eq 'ARRAY' ) {
+            for my $val ( @$value ) {
+                push ( @snipped_loop, { snippet_option => $val } );
+            }
+        } else {
+            push ( @snipped_loop, { snippet_option => $value } );
+        }
+        $param->{ $key . '_loop' } = \@snipped_loop;
     }
     my $snippet = $plugin->get_config_value( $object_type . '_snippet', 'blog:' . $param->{ blog_id } );
     $snippet .= '<input type="hidden" name="snippet_beacon" value="1" id="snippet_beacon" />';
