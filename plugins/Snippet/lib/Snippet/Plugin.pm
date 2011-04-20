@@ -72,7 +72,7 @@ sub _hdlr_snippet_vars {
 }
 
 sub preview_snippet {
-    my ( $cb, $app, $entry, $param ) = @_;
+    my ( $cb, $app, $entry, $params ) = @_;
     if (! $app->param( 'snippet_beacon' ) ) {
         return;
     }
@@ -86,8 +86,21 @@ sub preview_snippet {
                 my @values = $q->param( $key );
                 if ( scalar @values > 1 ) {
                     $data->{ $key } = \@values;
+                    for my $pv ( @values ) {
+                        push @$params,
+                          {
+                              data_name  => $key,
+                              data_value => $pv,
+                          };
+                    }
                 } else {
                     $data->{ $key } = $value;
+                    push @$params,
+                      {
+                          data_name  => $key,
+                          data_value => $value,
+                      };
+
                 }
             }
         }
@@ -167,6 +180,26 @@ sub insert_snippet {
         required => '0',
         field_html => $snippet,
     } );
+    if ( $app->param( 'reedit' ) ) {
+        my $q = $app->param();
+        for my $key ( $q->param ) {
+            if ( $key =~ /^snippet/ ) {
+                my $value = $q->param( $key );
+                my @values = $q->param( $key );
+                my @snipped_loop;
+                if ( scalar @values > 1 ) {
+                    for my $pv ( @values ) {
+                        push ( @snipped_loop, { snippet_option => $pv } );
+                    }
+                } else {
+                    $param->{ $key } = $value;
+                    push ( @snipped_loop, { snippet_option => $value } );
+                }
+                $param->{ $key . '_loop' } = \@snipped_loop;
+            }
+        }
+    }
+    return 1;
 }
 
 1;
