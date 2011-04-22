@@ -100,7 +100,6 @@ sub preview_snippet {
                           data_name  => $key,
                           data_value => $value,
                       };
-
                 }
             }
         }
@@ -169,7 +168,8 @@ sub insert_snippet {
     my $snippet = $plugin->get_config_value( $object_type . '_snippet', 'blog:' . $param->{ blog_id } );
     $snippet .= '<input type="hidden" name="snippet_beacon" value="1" id="snippet_beacon" />';
     my $entry_prefs = $app->permissions->$prefs;
-    my $show_snippet = 1 if $entry_prefs =~ /,snippet,/;
+    my @prefs = split( /,/, $entry_prefs );
+    my $show_snippet = 1 if grep( /^snippet$/, @prefs );
     push( @{ $param->{ field_loop } }, {
         field_id => 'snippet',
         lock_field => '0',
