@@ -66,9 +66,9 @@ sub _hdlr_snippet_vars {
     for my $snippet ( @snipped_loop ) {
         $vars->{ 'snippet_option' } = $snippet->{ snippet_option };
     }
-    my $out = $builder->build( $ctx, $tokens, $cond );
+    my $build = $builder->build( $ctx, $tokens, $cond );
     $vars = $ctx->{ __stash }{ vars } = $old_vars;
-    return $out;
+    return $build;
 }
 
 sub preview_snippet {
@@ -167,9 +167,12 @@ sub insert_snippet {
     }
     my $snippet = $plugin->get_config_value( $object_type . '_snippet', 'blog:' . $param->{ blog_id } );
     $snippet .= '<input type="hidden" name="snippet_beacon" value="1" id="snippet_beacon" />';
+    my $show_snippet;
     my $entry_prefs = $app->permissions->$prefs;
-    my @prefs = split( /,/, $entry_prefs );
-    my $show_snippet = 1 if grep( /^snippet$/, @prefs );
+    if ( $entry_prefs ) {
+        my @prefs = split( /,/, $entry_prefs );
+        $show_snippet = 1 if grep( /^snippet$/, @prefs );
+    }
     push( @{ $param->{ field_loop } }, {
         field_id => 'snippet',
         lock_field => '0',

@@ -34,7 +34,6 @@ function smarty_block_mtentrysnippetvars ( $args, $content, &$ctx, &$repeat ) {
         $value = $snippet_option[ $counter ];
         $ctx->__stash[ 'vars' ][ 'snippet_option' ] = $value;
         $ctx->__stash[ 'vars' ][ '__counter__' ] = $count;
-        
         $repeat = TRUE;
     } else {
         $ctx->restore( $localvars );
