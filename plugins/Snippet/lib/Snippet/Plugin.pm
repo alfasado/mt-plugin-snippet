@@ -51,24 +51,26 @@ sub _hdlr_snippet_vars {
     my $out = MT::Serialize->unserialize( $data );
     my $params = $$out;
     my $value = $params->{ $key };
-    my @snipped_loop;
+    my @snippet_loop;
     if ( ( ref $value ) eq 'ARRAY' ) {
         for my $val ( @$value ) {
-            push ( @snipped_loop, { snippet_option => $val } );
+            push ( @snippet_loop, { snippet_option => $val } );
         }
     } else {
-        push ( @snipped_loop, { snippet_option => $value } );
+        push ( @snippet_loop, { snippet_option => $value } );
     }
     my $tokens = $ctx->stash( 'tokens' );
     my $builder = $ctx->stash( 'builder' );
     my $vars = $ctx->{ __stash }{ vars } ||= {};
     my $old_vars = $vars;
-    for my $snippet ( @snipped_loop ) {
+    my $res = '';
+    for my $snippet ( @snippet_loop ) {
         $vars->{ 'snippet_option' } = $snippet->{ snippet_option };
+        my $build = $builder->build( $ctx, $tokens, $cond );
+        $res .= $build;
     }
-    my $build = $builder->build( $ctx, $tokens, $cond );
     $vars = $ctx->{ __stash }{ vars } = $old_vars;
-    return $build;
+    return $res;
 }
 
 sub preview_snippet {
@@ -155,15 +157,15 @@ sub insert_snippet {
     foreach my $key ( keys %$params ) {
         my $value = $params->{ $key };
         $param->{ $key } = $value;
-        my @snipped_loop;
+        my @snippet_loop;
         if ( ( ref $value ) eq 'ARRAY' ) {
             for my $val ( @$value ) {
-                push ( @snipped_loop, { snippet_option => $val } );
+                push ( @snippet_loop, { snippet_option => $val } );
             }
         } else {
-            push ( @snipped_loop, { snippet_option => $value } );
+            push ( @snippet_loop, { snippet_option => $value } );
         }
-        $param->{ $key . '_loop' } = \@snipped_loop;
+        $param->{ $key . '_loop' } = \@snippet_loop;
     }
     my $snippet = $plugin->get_config_value( $object_type . '_snippet', 'blog:' . $param->{ blog_id } );
     $snippet .= '<input type="hidden" name="snippet_beacon" value="1" id="snippet_beacon" />';
@@ -189,16 +191,16 @@ sub insert_snippet {
             if ( $key =~ /^snippet/ ) {
                 my $value = $q->param( $key );
                 my @values = $q->param( $key );
-                my @snipped_loop;
+                my @snippet_loop;
                 if ( scalar @values > 1 ) {
                     for my $pv ( @values ) {
-                        push ( @snipped_loop, { snippet_option => $pv } );
+                        push ( @snippet_loop, { snippet_option => $pv } );
                     }
                 } else {
                     $param->{ $key } = $value;
-                    push ( @snipped_loop, { snippet_option => $value } );
+                    push ( @snippet_loop, { snippet_option => $value } );
                 }
-                $param->{ $key . '_loop' } = \@snipped_loop;
+                $param->{ $key . '_loop' } = \@snippet_loop;
             }
         }
     }
